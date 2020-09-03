@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kibana-logging
+  namespace: kube-system
+  labels:
+    k8s-app: kibana-logging
+    addonmanager.kubernetes.io/mode: Reconcile
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      k8s-app: kibana-logging
+  template:
+    metadata:
+      labels:
+        k8s-app: kibana-logging
+      annotations:
+        seccomp.security.alpha.kubernetes.io/pod: 'docker/default'
+    spec:
+      containers:
+      - name: kibana
+        image: amazon/opendistro-for-elasticsearch-kibana:1.4.0
+        imagePullPolicy: IfNotPresent
+        #### SDS PaaS - only for test
+        ##command: ["/usr/share/kibana/bin/../node/bin/node"]
+        ##args: ["--no-warnings", "--max-http-header-size=1000000", "/usr/share/kibana/bin/../src/cli", "--cpu.cgroup.path.override=/", "--cpuacct.cgroup.path.override=/", "--elasticsearch.password=krDbaA3A6eI7P0YmNk", "--elasticsearch.hosts=http://elasticsearch-logging2:9200", "--elasticsearch.username=kibanaserver", "--server.host=0.0.0.0", "--server.name=localhost"]
+        env:
+          - name: SERVER_NAME
+            value: localhost
+          - name: SERVER_HOST
+            value: 0.0.0.0
+          - name: ELASTICSEARCH_HOSTS
+            value: http://elasticsearch-logging2:9200
+          - name: CLUSTER_NAME
+            value: logs
+          - name: ELASTICSEARCH_USERNAME
+            value: kibanaserver
+          - name: ELASTICSEARCH_PASSWORD
+            value: krDbaA3A6eI7P0YmNk
+          #### SDS PaaS - only for test
+          ##- name: NODE_OPTIONS
+          ##  value: "--max-http-header-length=1048576"
+        ports:
+        - containerPort: 5601
+          name: http
+        readinessProbe:
+          tcpSocket:
+            port: http
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        livenessProbe:
+          tcpSocket:
+            port: http
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        volumeMounts:
+        - mountPath: /usr/share/kibana/config/kibana.yml
+          name: config
+          subPath: kibana.yml
+      volumes:
+      - name: config
+        configMap:
+          name: kibana
+

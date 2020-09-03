@@ -1,0 +1,21 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: kibana-ingress
+  namespace: kube-system
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    #### SDS PaaS - only for test
+    ##nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    ##nginx.ingress.kubernetes.io/proxy-body-size: 8m
+    ##nginx.ingress.kubernetes.io/proxy-buffer-size: "8k"
+spec:
+  rules:
+  - host: kibana.window.sdspaas.io
+    http:
+      paths:
+      - backend:
+          serviceName: kibana-logging
+          servicePort: 5601
+        path: /
+

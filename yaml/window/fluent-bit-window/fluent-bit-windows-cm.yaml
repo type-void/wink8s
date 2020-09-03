@@ -1,0 +1,115 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fluent-bit-windows-config
+  namespace: kube-system
+data:
+  fluent-bit.conf: |-
+    [SERVICE]
+        Flush         5
+        Log_Level     info
+        Daemon        off
+        Parsers_File  parsers.conf
+   
+    #############################################################
+    ## systemd
+ 
+ 
+    [INPUT]
+        Name              tail
+        Tag               kubelet
+        Path              c:\\var\\log\\kubelet\\kubelet.exe.INFO
+        #Path              c:\\var\\log\\containers\\kube-proxy-windows-x2drv_kube-system_kube-proxy-61bc2a0af2df9d5a522c5b9ab75c9e4c65aaf1916880d8f1d08d52d85a6b4a38.log
+        Refresh_Interval  60
+        Ignore_Older      10s
+        Rotate_Wait       5
+        DB                c:\\var\\log\\flb_kubelet.db
+ 
+    [FILTER]
+        Name    modify
+        Match   kubelet
+        Set     SYSLOG_IDENTIFIER  kubelet
+        Set     _COMM              kubelet
+        Set     _HOSTNAME          ${HOSTNAME}
+        Set     a_key              systemd
+ 
+ 
+    #############################################################
+    ## kube-system
+ 
+    [INPUT]
+        Name              tail
+        Tag               kube.*
+        Path              c:\\var\\log\\containers\\*_kube-proxy_*kube-system*.log
+        #Path              c:\\var\\log\\containers\\kube-proxy-w.log
+        # Exclude_Path      c:\\programdata\\docker\\containers\\fluent*_kube-system_*.log
+        # Parser            docker
+        Refresh_Interval  60
+        Ignore_Older      10s
+        Rotate_Wait       5
+        DB                c:\\var\\log\\flb_kube.db
+ 
+ 
+    [FILTER]
+        Name                 kubernetes
+        Match                kube.*
+        Kube_URL             https://kubernetes.default.svc:443
+        Kube_CA_File         c:\\var\\run\\secrets\\kubernetes.io\\serviceaccount\\ca.crt ################################ 수정필요
+        Kube_Token_File      c:\\var\\run\\secrets\\kubernetes.io\\serviceaccount\\token  ################################ 수정필요
+        Merge_Log            On
+        Merge_Log_Key        log_processed
+        Merge_Log_Trim       On
+        Keep_Log             Off
+        K8S-Logging.Parser   On
+        K8S-Logging.Exclude  On
+        Labels               Off
+        Annotations          Off
+        Kube_meta_preload_cache_dir c:\\fluent-bit\\cache
+ 
+ 
+    [FILTER]
+        Name   modify
+        Match  kube.*
+        Set    a_key    kube-system
+ 
+    #############################################################
+    ## output
+    #[OUTPUT]
+    #    Name stdout
+    #    Match *
+ 
+    [OUTPUT]
+        Name                 es
+        Match                *
+        Host                 ${FLUENT_ELASTICSEARCH_HOST}
+        Port                 ${FLUENT_ELASTICSEARCH_PORT}
+        HTTP_User            ${FLUENT_ELASTICSEARCH_USERNAME}
+        HTTP_Passwd          ${FLUENT_ELASTICSEARCH_PASSWORD}
+        Logstash_Format      On
+        Logstash_Prefix_Key  a_key
+        Replace_Dots         On
+        Retry_Limit          False
+        tls.verify           Off
+        Include_Tag_Key      On
+ 
+  parsers.conf: |
+    [PARSER]
+        Name         json
+        Format       json
+        Time_Key     time
+        Time_Format  %d/%b/%Y:%H:%M:%S %z
+ 
+    [PARSER]
+        Name         docker
+        Format       json
+        Time_Key     time
+        Time_Format  %Y-%m-%dT%H:%M:%S.%L
+        Time_Keep    On
+ 
+    ############ SDS Custom Parsers
+    [PARSER]
+        Name         glog
+        Format       regex
+        Regex        ^(?<level>\w)(?<time>\d{4} [^\s]*)\s+(?<pid>\d+)\s+(?<source>[^ \]]+)\] (?<log>.*)
+        Time_Key     time
+        Time_Format  %Y-%m-%dT%H:%M:%S.%L

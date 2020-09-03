@@ -1,0 +1,32 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: grafana-cm
+  namespace: kube-system
+data:
+  grafana.ini: |
+    [paths]
+    data = /var/lib/grafana/data
+    logs = /var/log/grafana
+    plugins = /var/lib/grafana/plugins
+    [security]
+    admin_user = admin
+    admin_password = admin
+    [users]
+    ;allow_sign_up = true
+    ;allow_org_create = true
+    ;auto_assign_org = true
+    ;auto_assign_org_role = Viewer
+    ;login_hint = email or username
+    ;default_theme = dark
+    [auth.anonymous]
+    enabled = false
+    [log]
+    mode = console
+    level = info
+    [dashboards.json]
+    enabled = true
+    path = /var/lib/grafana/dashboards
+    [grafana_net]
+    url = https://grafana.net
+

@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: load
+  labels:
+    app: load
+spec:
+  replicas: 1
+  template:
+    metadata:
+      name: load
+      labels:
+        app: load
+    spec:
+      nodeSelector:
+        "kubernetes.io/os": windows
+      containers:
+      - name: load
+        image: performancetesting/load_generator_windows:20.01
+        ports:
+          - containerPort: 54345
+  selector:
+    matchLabels:
+      app: load
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: load
+spec:  
+  ports:
+  - protocol: TCP
+    port: 54345
+  selector:
+    app: load
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: load-ingress  
+  annotations:
+    kubernetes.io/ingress.class: "nginx"    
+spec:
+  rules:
+  - host: dashboard.window.sdspaas.io
+    http:
+      paths:
+      - path:
+        backend:
+          serviceName: load
+          servicePort: 54345

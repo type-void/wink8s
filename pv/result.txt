@@ -1,0 +1,52 @@
+[root@wc-master1 pv]# k exec -it busybox-smb-866b4df9cf-fvqp6 powershell
+kubectl exec [POD] [COMMAND] is DEPRECATED and will be removed in a future version. Use kubectl kubectl exec [POD] -- [COMMAND] instead.
+PowerShell 6.2.0
+Copyright (c) Microsoft Corporation. All rights reserved.
+
+https://aka.ms/pscore6-docs
+Type 'help' to get help.
+
+
+PS C:\> cd C:\mnt\smb
+PS C:\mnt\smb> dir
+PS C:\mnt\smb> $hello = "Hello world"
+PS C:\mnt\smb> $hello = "Hello world2"
+PS C:\mnt\smb> $hello | Out-File hello2.txt
+PS C:\mnt\smb> dir
+
+
+    Directory: C:\mnt\smb
+
+Mode                LastWriteTime         Length Name
+----                -------------         ------ ----
+-a----          9/3/2020  1:16 PM             13 hello1.txt
+-a----          9/3/2020  1:17 PM             14 hello2.txt
+
+PS C:\mnt\smb>
+
+
+
+
+PS C:\mnt\smb> $hello = "Hello world"
+PS C:\mnt\smb> $hello | Out-File hello1.txt
+PS C:\mnt\smb> dir
+
+
+    Directory: C:\mnt\smb
+
+Mode                LastWriteTime         Length Name
+----                -------------         ------ ----
+-a----          9/3/2020  1:16 PM             13 hello1.txt
+
+
+
+[root@wc-lnxnode2 smbshare-volume]# cat hello1.txt
+Hello world
+[root@wc-lnxnode2 smbshare-volume]# cat hello2.txt
+Hello world2
+[root@wc-lnxnode2 smbshare-volume]#
+[root@wc-lnxnode2 smbshare-volume]#
+[root@wc-lnxnode2 smbshare-volume]#
+[root@wc-lnxnode2 smbshare-volume]# pwd
+/smbshare-volume
+

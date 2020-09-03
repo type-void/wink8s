@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dotnet
+  labels:
+    app: dotnet
+spec:
+  replicas: 1
+  template:
+    metadata:
+      name: dotnet
+      labels:
+        app: dotnet
+    spec:
+      nodeSelector:
+        "kubernetes.io/os": windows
+      containers:
+      - name: dotnet
+        image: mcr.microsoft.com/dotnet/framework/samples:aspnetapp
+        ports:
+          - containerPort: 80
+  selector:
+    matchLabels:
+      app: dotnet
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dotnet
+spec:  
+  ports:
+  - protocol: TCP
+    port: 80
+  selector:
+    app: dotnet
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: dotnet-ingress  
+  annotations:
+    kubernetes.io/ingress.class: "nginx"    
+spec:
+  rules:
+  - host: dotnet.window.sdspaas.io
+    http:
+      paths:
+      - path:
+        backend:
+          serviceName: dotnet
+          servicePort: 80

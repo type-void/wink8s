@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: fluent-bit-windows
+  namespace: kube-system
+  labels:
+    k8s-app: fluent-bit-windows
+    version: v1
+    kubernetes.io/cluster-service: "true"
+spec:
+  selector:
+    matchLabels:
+      k8s-app: fluent-bit-windows
+  template:
+    metadata:
+      labels:
+        k8s-app: fluent-bit-windows
+        version: v1
+        kubernetes.io/cluster-service: "true"
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "2020"
+        prometheus.io/path: /api/v1/metrics/prometheus
+    spec:
+      nodeSelector:
+        kubernetes.io/os: windows
+      containers:
+      - name: fluent-bit
+        image: fluent/fluent-bit:1.3.8-servercore
+        #command: ['powershell', 'cat', '/fluent-bit/conf/fluent-bit.conf']
+        imagePullPolicy: IfNotPresent
+        ports:
+          - containerPort: 2020
+        env:
+        - name: FLUENT_ELASTICSEARCH_HOST
+          value: "elasticsearch-logging2"
+        - name: FLUENT_ELASTICSEARCH_PORT
+          value: "9200"
+        - name: FLUENT_ELASTICSEARCH_USERNAME
+          value: "admin"
+        - name: FLUENT_ELASTICSEARCH_PASSWORD
+          value: "aM5a9Bts4uelKB1fba"
+        volumeMounts:
+        - name: config-volume
+          mountPath: c:\fluent-bit\conf
+        - name: varlog-volume
+          mountPath: c:\var\log
+        - name: dockercontainers-volume
+          mountPath: c:\programdata\docker\containers
+      terminationGracePeriodSeconds: 10
+      volumes:
+      - name: dockercontainers-volume
+        hostPath:
+          path: c:\programdata\docker\containers
+      - name: config-volume
+        configMap:
+          name: fluent-bit-windows-config
+      - name: varlog-volume
+        hostPath:
+          path: c:\var\log
+      serviceAccountName: fluent-bit
+

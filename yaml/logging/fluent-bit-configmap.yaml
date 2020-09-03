@@ -1,0 +1,345 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fluent-bit-config
+  namespace: kube-system
+  labels:
+    k8s-app: fluent-bit
+data:
+  # Configuration files: server, input, filters and output
+  # ======================================================
+  fluent-bit.conf: |
+    [SERVICE]
+        Flush         1
+        Log_Level     info
+        Daemon        off
+        Parsers_File  parsers.conf
+        HTTP_Server   On
+        HTTP_Listen   0.0.0.0
+        HTTP_Port     2020
+
+    @INCLUDE input-kubernetes.conf
+    @INCLUDE filter-kubernetes.conf
+    @INCLUDE output-elasticsearch.conf
+
+  input-kubernetes.conf: |
+    #### app logging - SDS PaaS alpha feature
+    #[INPUT]
+    #    Name              tail
+    #    Tag               kube.*
+    #    Path              /var/log/containers/*.log
+    #    Exclude_Path      /var/log/containers/*_kube-system_*.log
+    #    Parser            docker
+    #    DB                /var/log/flb_kube.db
+    #    Mem_Buf_Limit     5MB
+    #    Skip_Long_Lines   On
+    #    Refresh_Interval  10
+
+    #### app namespaced logging - SDS PaaS 2020-01-06 only for test
+    #[INPUT]
+    #    Name              tail
+    #    Tag               kube.*
+    #    Path              /var/log/containers/*_namespace1_*.log
+    #    Parser            docker
+    #    DB                /var/log/flb_ns_namespace1.db
+    #    Skip_Long_Lines   On
+    
+    #### admin logging
+    [INPUT]
+        Name              tail
+        Tag               audit
+        Path              /var/log/kubernetes/audit
+        Parser            json
+        DB                /var/log/flb_audit.db
+    
+    [INPUT]
+        Name              tail
+        Tag               event
+        Path              /var/log/containers/eventrouter-*_kube-system_*.log
+        Parser            event
+        DB                /var/log/flb_event.db
+
+    [INPUT]
+        Name              tail
+        Tag               ingress
+        Path              /var/log/containers/nginx-ingress-controller-*_kube-system_*.log
+        Parser            docker
+        #### SDS PaaS 2020-01-14 comment to reduce iowait
+        #DB                /var/log/flb_ingress.db
+
+    [INPUT]
+        Name              systemd
+        Tag               systemd
+        Path              /var/log/journal/
+        #Systemd_Filter    _SYSTEMD_UNIT=docker.service
+        #Systemd_Filter    _SYSTEMD_UNIT=kubelet.service
+        Parser            docker
+        DB                /var/log/flb_systemd.db
+
+    #### redii logging - SDS PaaS 2020-01-06 only for test
+    #[INPUT]
+    #    Name              tail
+    #    Tag               redii-was
+    #    Path              /var/log/containers/redii-was-*_kube-system_*.log
+    #    Parser            docker
+    #    DB                /var/log/flb_redii-was.db
+    # 
+    #[INPUT]
+    #    Name              tail
+    #    Tag               redii-web
+    #    Path              /var/log/containers/redii-web-*_kube-system_*.log
+    #    Parser            docker
+    #    DB                /var/log/flb_redii-web.db
+    #
+    #[INPUT]
+    #    Name              tail
+    #    Tag               redii-cli
+    #    Path              /var/log/containers/redii-cli-*_kube-system_*.log
+    #    Parser            docker
+    #    DB                /var/log/flb_redii-cli.db
+ 
+  filter-kubernetes.conf: |
+    #### app logging - SDS PaaS alpha feature
+    [FILTER]
+        Name                kubernetes
+        Match               kube.*
+        Kube_URL            https://kubernetes.default.svc:443
+        Kube_CA_File        /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+        Kube_Token_File     /var/run/secrets/kubernetes.io/serviceaccount/token
+        Kube_Tag_Prefix     kube.var.log.containers.
+        Merge_Log           On
+        Merge_Log_Key       log_processed
+        K8S-Logging.Parser  On
+        K8S-Logging.Exclude Off
+    
+    [FILTER]
+        Name                nest
+        Match               kube.*
+        Operation           lift
+        Nested_under        kubernetes
+ 
+    #### admin logging
+    [FILTER]
+        Name                nest
+        Match               event
+        Operation           lift
+        Nested_under        log
+
+    [FILTER]
+        Name                grep
+        Match               event
+        Regex               verb ADDED|UPDATED
+   
+    [FILTER]
+        Name                parser
+        Match               ingress
+        Key_Name            log
+        Reserve_Data        True
+        Parser              k8s-nginx-ingress
+
+    [FILTER]
+        Name                parser
+        Match               ingress
+        Key_Name            log
+        Reserve_Data        True
+        Parser              glog
+
+    [FILTER]
+        Name                grep
+        Match               systemd
+        Regex               SYSLOG_IDENTIFIER kubelet|docker|etcd|containerd|kernel
+
+  output-elasticsearch.conf: |
+    ### app logging - SDS PaaS alpha feature
+    #[OUTPUT]
+    #    Name            es
+    #    Match           kube.*
+    #    Logstash_Prefix app
+    #    Host            ${FLUENT_ELASTICSEARCH_HOST}
+    #    Port            ${FLUENT_ELASTICSEARCH_PORT}
+    #    HTTP_User       ${FLUENT_ELASTICSEARCH_USERNAME}
+    #    HTTP_Passwd     ${FLUENT_ELASTICSEARCH_PASSWORD}
+    #    Logstash_Format On
+    #    Replace_Dots    On
+    #    Retry_Limit     False
+    #    tls.verify      Off
+
+    #### admin logging
+    [OUTPUT]
+        Name            es
+        Match           audit
+        Logstash_Prefix audit
+        Host            ${FLUENT_ELASTICSEARCH_HOST}
+        Port            ${FLUENT_ELASTICSEARCH_PORT}
+        HTTP_User       ${FLUENT_ELASTICSEARCH_USERNAME}
+        HTTP_Passwd     ${FLUENT_ELASTICSEARCH_PASSWORD}
+        Logstash_Format On
+        Replace_Dots    On
+        Retry_Limit     False
+        tls.verify      Off
+
+    [OUTPUT]
+        Name            es
+        Match           event
+        Logstash_Prefix event
+        Host            ${FLUENT_ELASTICSEARCH_HOST}
+        Port            ${FLUENT_ELASTICSEARCH_PORT}
+        HTTP_User       ${FLUENT_ELASTICSEARCH_USERNAME}
+        HTTP_Passwd     ${FLUENT_ELASTICSEARCH_PASSWORD}
+        Logstash_Format On
+        Replace_Dots    On
+        Retry_Limit     False
+        tls.verify      Off
+
+    [OUTPUT]
+        Name            es
+        Match           ingress
+        Logstash_Prefix ingress
+        Host            ${FLUENT_ELASTICSEARCH_HOST}
+        Port            ${FLUENT_ELASTICSEARCH_PORT}
+        HTTP_User       ${FLUENT_ELASTICSEARCH_USERNAME}
+        HTTP_Passwd     ${FLUENT_ELASTICSEARCH_PASSWORD}
+        Logstash_Format On
+        Replace_Dots    On
+        Retry_Limit     False
+        tls.verify      Off
+
+    [OUTPUT]
+        Name            es
+        Match           systemd
+        Logstash_Prefix systemd
+        Host            ${FLUENT_ELASTICSEARCH_HOST}
+        Port            ${FLUENT_ELASTICSEARCH_PORT}
+        HTTP_User       ${FLUENT_ELASTICSEARCH_USERNAME}
+        HTTP_Passwd     ${FLUENT_ELASTICSEARCH_PASSWORD}
+        Logstash_Format On
+        Replace_Dots    On
+        Retry_Limit     False
+        tls.verify      Off
+
+    #### redii logging - SDS PaaS - only for test
+    #[OUTPUT]
+    #    Name            es
+    #    Match           redii-was
+    #    Index           redii-was
+    #    Logstash_Prefix redii-was
+    #    Host            ${FLUENT_ELASTICSEARCH_HOST}
+    #    Port            ${FLUENT_ELASTICSEARCH_PORT}
+    #    HTTP_User       ${FLUENT_ELASTICSEARCH_USERNAME}
+    #    HTTP_Passwd     ${FLUENT_ELASTICSEARCH_PASSWORD}
+    #    Logstash_Format On
+    #    Replace_Dots    On
+    #    Retry_Limit     False
+    #    tls.verify      Off
+    #
+    #[OUTPUT]
+    #    Name            es
+    #    Match           redii-web
+    #    Index           redii-web
+    #    Logstash_Prefix redii-web
+    #    Host            ${FLUENT_ELASTICSEARCH_HOST}
+    #    Port            ${FLUENT_ELASTICSEARCH_PORT}
+    #    HTTP_User       ${FLUENT_ELASTICSEARCH_USERNAME}
+    #    HTTP_Passwd     ${FLUENT_ELASTICSEARCH_PASSWORD}
+    #    Logstash_Format On
+    #    Replace_Dots    On
+    #    Retry_Limit     False
+    #    tls.verify      Off
+    #
+    #[OUTPUT]
+    #    Name            es
+    #    Match           redii-cli
+    #    Index           redii-cli
+    #    Logstash_Prefix redii-cli
+    #    Host            ${FLUENT_ELASTICSEARCH_HOST}
+    #    Port            ${FLUENT_ELASTICSEARCH_PORT}
+    #    HTTP_User       ${FLUENT_ELASTICSEARCH_USERNAME}
+    #    HTTP_Passwd     ${FLUENT_ELASTICSEARCH_PASSWORD}
+    #    Logstash_Format On
+    #    Replace_Dots    On
+    #    Retry_Limit     False
+    #    tls.verify      Off
+
+  parsers.conf: |
+    #### SDS PaaS 2019-01-06 commented
+    #[PARSER]
+    #    Name   apache
+    #    Format regex
+    #    Regex  ^(?<host>[^ ]*) [^ ]* (?<user>[^ ]*) \[(?<time>[^\]]*)\] "(?<method>\S+)(?: +(?<path>[^\"]*?)(?: +\S*)?)?" (?<code>[^ ]*) (?<size>[^ ]*)(?: "(?<referer>[^\"]*)" "(?<agent>[^\"]*)")?$
+    #    Time_Key time
+    #    Time_Format %d/%b/%Y:%H:%M:%S %z
+    #
+    #[PARSER]
+    #    Name   apache2
+    #    Format regex
+    #    Regex  ^(?<host>[^ ]*) [^ ]* (?<user>[^ ]*) \[(?<time>[^\]]*)\] "(?<method>\S+)(?: +(?<path>[^ ]*) +\S*)?" (?<code>[^ ]*) (?<size>[^ ]*)(?: "(?<referer>[^\"]*)" "(?<agent>[^\"]*)")?$
+    #    Time_Key time
+    #    Time_Format %d/%b/%Y:%H:%M:%S %z
+    #
+    #[PARSER]
+    #    Name   apache_error
+    #    Format regex
+    #    Regex  ^\[[^ ]* (?<time>[^\]]*)\] \[(?<level>[^\]]*)\](?: \[pid (?<pid>[^\]]*)\])?( \[client (?<client>[^\]]*)\])? (?<message>.*)$
+    #
+    #[PARSER]
+    #    Name   nginx
+    #    Format regex
+    #    Regex ^(?<remote>[^ ]*) (?<host>[^ ]*) (?<user>[^ ]*) \[(?<time>[^\]]*)\] "(?<method>\S+)(?: +(?<path>[^\"]*?)(?: +\S*)?)?" (?<code>[^ ]*) (?<size>[^ ]*)(?: "(?<referer>[^\"]*)" "(?<agent>[^\"]*)")?$
+    #    Time_Key time
+    #    Time_Format %d/%b/%Y:%H:%M:%S %z
+    
+    # 2020-02-10 - deprecated
+    #[PARSER]
+    #    #### nginx ingress controller v0.19 compatible
+    #    Name         k8s-nginx-ingress-0-19
+    #    Format       regex
+    #    Regex        ^(?<host>[^ ]*) - \[(?<real_ip>[^ ]*)\] - (?<user>[^ ]*) \[(?<time>[^\]]*)\] "(?<method>\S+)(?: +(?<path>[^\"]*?)(?: +\S*)?)?" (?<code>[^ ]*) (?<size>[^ ]*) "(?<referer>[^\"]*)" "(?<agent>[^\"]*)" (?<request_length>[^ ]*) (?<request_time>[^ ]*) \[(?<proxy_upstream_name>[^ ]*)\] (?<upstream_addr>[^ ]*) (?<upstream_response_length>[^ ]*) (?<upstream_response_time>[^ ]*) (?<upstream_status>[^ ]*) (?<last>[^$]*)
+    #    Time_Key     time
+    #    Time_Format  %d/%b/%Y:%H:%M:%S %z
+
+    [PARSER]
+        #### nginx ingress controller v0.27.1 compatible
+        Name         k8s-nginx-ingress
+        Format       regex
+        Regex        ^(?<addr>[^ ]*) - (?<user>[^ ]*) \[(?<time>[^\]]*)\] "(?<method>\S+)(?: +(?<path>[^\"]*?)(?: +\S*)?)?" (?<code>[^ ]*) (?<size>[^ ]*) "(?<referer>[^\"]*)" "(?<agent>[^\"]*)" (?<request_length>[^ ]*) (?<request_time>[^ ]*) \[(?<proxy_upstream_name>[^ ]*)\] \[(?<proxy_alternative_upstream_name>[^ ]*)\] (?<upstream_addr>[^ ]*) (?<upstream_response_length>[^ ]*) (?<upstream_response_time>[^ ]*) (?<upstream_status>[^ ]*) (?<req_id>[^$]*)
+        Time_Key     time
+        Time_Format  %d/%b/%Y:%H:%M:%S %z
+
+    [PARSER]
+        Name         glog
+        Format       regex
+        Regex        ^(?<level>\w)(?<time>\d{4} [^\s]*)\s+(?<pid>\d+)\s+(?<source>[^ \]]+)\] (?<log>.*)
+        Time_Key     time
+        Time_Format  %m%d %H:%M:%S.%L
+        #Time_Keep    Off
+
+    [PARSER]
+        Name         json
+        Format       json
+        Time_Key     time
+        Time_Format  %d/%b/%Y:%H:%M:%S %z
+
+    [PARSER]
+        Name         docker
+        Format       json
+        Time_Key     time
+        Time_Format  %Y-%m-%dT%H:%M:%S.%L
+        Time_Keep    On
+
+    [PARSER]
+        Name         event
+        Format       json
+        Time_Key     time
+        Time_Format  %Y-%m-%dT%H:%M:%S.%L
+        Time_Keep    On
+        Decode_Field_As json log
+
+    #### SDS PaaS 2019-01-06 commented
+    #[PARSER]
+    #    Name        syslog
+    #    Format      regex
+    #    Regex       ^\<(?<pri>[0-9]+)\>(?<time>[^ ]* {1,2}[^ ]* [^ ]*) (?<host>[^ ]*) (?<ident>[a-zA-Z0-9_\/\.\-]*)(?:\[(?<pid>[0-9]+)\])?(?:[^\:]*\:)? *(?<message>.*)$
+    #    Time_Key    time
+    #    Time_Format %b %d %H:%M:%S
+
+

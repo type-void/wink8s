@@ -5,7 +5,7 @@ metadata:
 spec:
   podSelector:
     matchLabels:
-      run: nginx
+      app: win-webserver
   ingress:
   - from:
     - podSelector:

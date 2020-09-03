@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: grafana
+  name: grafana
+  namespace: kube-system
+spec:
+  selector:
+    matchLabels:
+      app: grafana
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: grafana
+    spec:
+      priorityClassName: system-cluster-critical
+      serviceAccountName: grafana-sidecar      
+      containers:
+        - name: grafana-dashboard
+          image: kiwigrid/k8s-sidecar:0.1.20
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: LABEL
+              value: "grafana_dashboard"
+            - name: FOLDER
+              value: "/tmp/dashboards"
+            - name: RESOURCE
+              value: "both"
+          volumeMounts:
+            - name: dashboard-volume
+              mountPath: /tmp/dashboards
+        - name: grafana
+          image: grafana/grafana:6.5.2
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3000
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 3000
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 3000
+            initialDelaySeconds: 60
+            timeoutSeconds: 30
+            failureThreshold: 10
+            periodSeconds: 10
+          volumeMounts:
+            - name: config-volume
+              mountPath: /etc/grafana
+            - name: grafana-volume
+              mountPath: /var/lib/grafana
+            - mountPath: /etc/grafana/provisioning/datasources
+              name: grafana-datasources
+              readOnly: false
+            - name: dashboard-volume
+              mountPath: /tmp/dashboards
+            - name: dashboard-provider
+              mountPath: /etc/grafana/provisioning/dashboards
+      nodeSelector:
+        kubernetes.io/os: linux
+      volumes:
+        - name: config-volume
+          configMap:
+            name: grafana-cm
+        - name: grafana-volume
+          emptyDir: {}
+        - name: grafana-datasources
+          secret:
+            secretName: grafana-datasources
+        - name: dashboard-volume
+          emptyDir: {}
+        - name: dashboard-provider
+          configMap:
+            name: grafana-dashboards-config
+

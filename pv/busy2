@@ -1,0 +1,197 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: "2020-09-01T05:12:26Z"
+  generateName: busybox-smb-866b4df9cf-
+  labels:
+    app: busybox
+    pod-template-hash: 866b4df9cf
+  managedFields:
+  - apiVersion: v1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:metadata:
+        f:generateName: {}
+        f:labels:
+          .: {}
+          f:app: {}
+          f:pod-template-hash: {}
+        f:ownerReferences:
+          .: {}
+          k:{"uid":"e9d04d74-fe63-487c-beb4-e5593d034b55"}:
+            .: {}
+            f:apiVersion: {}
+            f:blockOwnerDeletion: {}
+            f:controller: {}
+            f:kind: {}
+            f:name: {}
+            f:uid: {}
+      f:spec:
+        f:containers:
+          k:{"name":"busybox"}:
+            .: {}
+            f:command: {}
+            f:image: {}
+            f:imagePullPolicy: {}
+            f:name: {}
+            f:resources: {}
+            f:terminationMessagePath: {}
+            f:terminationMessagePolicy: {}
+            f:volumeMounts:
+              .: {}
+              k:{"mountPath":"/mnt/smb"}:
+                .: {}
+                f:mountPath: {}
+                f:name: {}
+        f:dnsPolicy: {}
+        f:enableServiceLinks: {}
+        f:nodeSelector:
+          .: {}
+          f:kubernetes.io/os: {}
+        f:restartPolicy: {}
+        f:schedulerName: {}
+        f:securityContext: {}
+        f:terminationGracePeriodSeconds: {}
+        f:volumes:
+          .: {}
+          k:{"name":"smb"}:
+            .: {}
+            f:name: {}
+            f:persistentVolumeClaim:
+              .: {}
+              f:claimName: {}
+    manager: kube-controller-manager
+    operation: Update
+    time: "2020-09-01T05:12:26Z"
+  - apiVersion: v1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:status:
+        f:conditions:
+          k:{"type":"ContainersReady"}:
+            .: {}
+            f:lastProbeTime: {}
+            f:lastTransitionTime: {}
+            f:status: {}
+            f:type: {}
+          k:{"type":"Initialized"}:
+            .: {}
+            f:lastProbeTime: {}
+            f:lastTransitionTime: {}
+            f:status: {}
+            f:type: {}
+          k:{"type":"Ready"}:
+            .: {}
+            f:lastProbeTime: {}
+            f:lastTransitionTime: {}
+            f:status: {}
+            f:type: {}
+        f:containerStatuses: {}
+        f:hostIP: {}
+        f:phase: {}
+        f:podIP: {}
+        f:podIPs:
+          .: {}
+          k:{"ip":"10.32.3.24"}:
+            .: {}
+            f:ip: {}
+        f:startTime: {}
+    manager: kubelet.exe
+    operation: Update
+    time: "2020-09-03T01:51:54Z"
+  name: busybox-smb-866b4df9cf-pbr49
+  namespace: default
+  ownerReferences:
+  - apiVersion: apps/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: ReplicaSet
+    name: busybox-smb-866b4df9cf
+    uid: e9d04d74-fe63-487c-beb4-e5593d034b55
+  resourceVersion: "3601017"
+  selfLink: /api/v1/namespaces/default/pods/busybox-smb-866b4df9cf-pbr49
+  uid: ed87191f-074c-460d-997d-ae0e9a2d3ee2
+spec:
+  containers:
+  - command:
+    - powershell.exe
+    - -Command
+    - sleep 10000;
+    image: e2eteam/busybox:1.29
+    imagePullPolicy: IfNotPresent
+    name: busybox
+    resources: {}
+    terminationMessagePath: /dev/termination-log
+    terminationMessagePolicy: File
+    volumeMounts:
+    - mountPath: /mnt/smb
+      name: smb
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: default-token-g4gsh
+      readOnly: true
+  dnsPolicy: ClusterFirst
+  enableServiceLinks: true
+  nodeName: wc-winnode1
+  nodeSelector:
+    kubernetes.io/os: windows
+  priority: 0
+  restartPolicy: Always
+  schedulerName: default-scheduler
+  securityContext: {}
+  serviceAccount: default
+  serviceAccountName: default
+  terminationGracePeriodSeconds: 30
+  tolerations:
+  - effect: NoExecute
+    key: node.kubernetes.io/not-ready
+    operator: Exists
+    tolerationSeconds: 300
+  - effect: NoExecute
+    key: node.kubernetes.io/unreachable
+    operator: Exists
+    tolerationSeconds: 300
+  volumes:
+  - name: smb
+    persistentVolumeClaim:
+      claimName: pvc-smb
+  - name: default-token-g4gsh
+    secret:
+      defaultMode: 420
+      secretName: default-token-g4gsh
+status:
+  conditions:
+  - lastProbeTime: null
+    lastTransitionTime: "2020-09-01T05:12:26Z"
+    status: "True"
+    type: Initialized
+  - lastProbeTime: null
+    lastTransitionTime: "2020-09-03T01:51:54Z"
+    status: "True"
+    type: Ready
+  - lastProbeTime: null
+    lastTransitionTime: "2020-09-03T01:51:54Z"
+    status: "True"
+    type: ContainersReady
+  - lastProbeTime: null
+    lastTransitionTime: "2020-09-01T05:12:26Z"
+    status: "True"
+    type: PodScheduled
+  containerStatuses:
+  - containerID: docker://7f3e9f834715c6ae7d268db5ac4f9373e5adde2c3640a0adb7e2feb19a5f5267
+    image: e2eteam/busybox:1.29
+    imageID: docker-pullable://e2eteam/busybox@sha256:3fcc09e9dfbb1ecd5bd36b84f500f3f486490d279f44da68d645b036a42ed9de
+    lastState: {}
+    name: busybox
+    ready: true
+    restartCount: 16
+    started: true
+    state:
+      running:
+        startedAt: "2020-09-03T01:51:52Z"
+  hostIP: 172.16.3.133
+  phase: Running
+  podIP: 10.32.3.24
+  podIPs:
+  - ip: 10.32.3.24
+  qosClass: BestEffort
+  startTime: "2020-09-01T05:12:26Z"

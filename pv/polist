@@ -1,0 +1,8 @@
+NAME                                    READY   STATUS    RESTARTS   AGE     IP             NODE          NOMINATED NODE   READINESS GATES
+busybox-smb-866b4df9cf-fvqp6            1/1     Running   16         46h     10.32.3.25     wc-winnode1   <none>           <none>
+busybox-smb-866b4df9cf-pbr49            1/1     Running   16         46h     10.32.3.24     wc-winnode1   <none>           <none>
+dotnet-d95697748-2nbfj                  1/1     Running   0          6d19h   10.32.3.11     wc-winnode1   <none>           <none>
+nginx-6f9965f88d-bnw29                  1/1     Running   0          9d      10.32.1.24     wc-lnxnode1   <none>           <none>
+pod-exec-5bc8dfdb5c-tfmk9               1/1     Running   0          9m30s   10.32.3.74     wc-winnode1   <none>           <none>
+termination-grace-85f77d496c-mmcc5      1/1     Running   0          2m3s    10.32.3.80     wc-winnode1   <none>           <none>
+win-webserver-hostnw-7b765b5cfb-ctnzw   1/1     Running   0          45h     172.16.3.133   wc-winnode1   <none>           <none>
