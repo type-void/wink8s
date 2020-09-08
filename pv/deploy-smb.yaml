@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: busybox
+  name: busybox-smb
+  namespace: default
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: busybox
+  template:
+    metadata:
+      labels:
+        app: busybox
+      name: busybox
+    spec:
+      containers:
+      - command:
+        - powershell.exe
+        - -Command
+        - sleep 10000;
+        image: e2eteam/busybox:1.29
+        imagePullPolicy: IfNotPresent
+        name: busybox
+        volumeMounts:
+        - mountPath: /mnt/smb
+          name: smb
+      nodeSelector:
+        kubernetes.io/os: windows
+      volumes:
+      - name: smb
+        persistentVolumeClaim:
+          claimName: pvc-smb
