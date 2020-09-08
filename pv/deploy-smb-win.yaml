@@ -3,10 +3,10 @@ kind: Deployment
 metadata:
   labels:
     app: busybox
-  name: busybox-file
+  name: busybox-smb-subpath-win
   namespace: default
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: busybox
@@ -25,12 +25,12 @@ spec:
         imagePullPolicy: IfNotPresent
         name: busybox
         volumeMounts:
-        - mountPath: /mnt/dir
-          name: mydir
+        - mountPath: /mnt/smb
+          name: smb
+          subPath: bb
       nodeSelector:
         kubernetes.io/os: windows
       volumes:
-      - name: mydir
-        hostPath:
-          path: '/'
-          type: Directory
+      - name: smb
+        persistentVolumeClaim:
+          claimName: pvc-smb

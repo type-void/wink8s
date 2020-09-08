@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   labels:
     app: busybox
-  name: busybox-file
+  name: busybox-file-linux
   namespace: default
 spec:
   replicas: 1
@@ -17,20 +17,19 @@ spec:
       name: busybox
     spec:
       containers:
-      - command:
-        - powershell.exe
-        - -Command
-        - sleep 10000;
-        image: e2eteam/busybox:1.29
+      - args:
+        - sleep
+        - "100000"
+        image: radial/busyboxplus:curl
         imagePullPolicy: IfNotPresent
         name: busybox
         volumeMounts:
-        - mountPath: /mnt/dir
-          name: mydir
+        - mountPath: /mnt/file
+          name: myfile
       nodeSelector:
-        kubernetes.io/os: windows
+        kubernetes.io/os: linux
       volumes:
-      - name: mydir
+      - name: myfile
         hostPath:
-          path: '/'
-          type: Directory
+          path: /mount_test/1.txt
+          type: FileOrCreate

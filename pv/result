@@ -1,0 +1,256 @@
+[root@wc-master1 pv]# cat deploy-file.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: busybox
+  name: busybox-file
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: busybox
+  template:
+    metadata:
+      labels:
+        app: busybox
+      name: busybox
+    spec:
+      containers:
+      - command:
+        - powershell.exe
+        - -Command
+        - sleep 10000;
+        image: e2eteam/busybox:1.29
+        imagePullPolicy: IfNotPresent
+        name: busybox
+        volumeMounts:
+        - mountPath: /mnt/dir
+          name: mydir
+      nodeSelector:
+        kubernetes.io/os: windows
+      volumes:
+      - name: mydir
+        hostPath:
+          path: '/'
+          type: Directory
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[root@wc-master1 pv]# k exec -it busybox-file-757c79f489-wf246 -- powershell
+PowerShell 6.2.0
+Copyright (c) Microsoft Corporation. All rights reserved.
+
+https://aka.ms/pscore6-docs
+Type 'help' to get help.
+
+PS C:\> dir
+
+
+    Directory: C:\
+
+Mode                LastWriteTime         Length Name
+----                -------------         ------ ----
+d-----          6/9/2020  5:29 PM                bin
+d-----          6/9/2020  5:29 PM                curl
+d-----          6/9/2020  5:30 PM                Microsoft
+d-----          9/8/2020  2:49 PM                mnt
+d-----          6/9/2020  5:29 PM                Program Files
+d-----          6/9/2020  5:29 PM                tmp
+d-r---          6/9/2020  5:29 PM                Users
+d-----          9/8/2020  2:49 PM                var
+d-----          6/9/2020  5:29 PM                Windows
+-a----          5/6/2020 10:03 PM           5510 License.txt
+
+PS C:\> cd mnt
+PS C:\mnt> dir
+
+
+    Directory: C:\mnt
+
+Mode                LastWriteTime         Length Name
+----                -------------         ------ ----
+d-----         8/27/2020  4:03 PM                dir
+
+PS C:\mnt> cd dir
+PS C:\mnt\dir> dir
+
+
+    Directory: C:\mnt\dir
+
+Mode                LastWriteTime         Length Name
+----                -------------         ------ ----
+d-----          9/7/2020  5:12 PM                docker
+d-----         8/19/2020  4:59 PM                etc
+d-----         8/31/2020 12:46 PM                k
+d-----         8/19/2020 10:44 AM                opt
+d-----         8/10/2020 12:40 PM                PerfLogs
+d-r---         8/31/2020 12:44 PM                Program Files
+d-----         8/10/2020 11:23 AM                Program Files (x86)
+d-----         8/27/2020  4:03 PM                run
+d-r---         8/12/2020  7:10 PM                Users
+d-----         8/19/2020  4:59 PM                usr
+d-----         8/19/2020  2:37 PM                var
+d-----         8/26/2020  5:39 PM                Windows
+
+
+
+
+==========================================================================================
+
+
+[root@wc-master1 pv]# k exec -it busybox-subdir-5b67cc7f68-nkl4z powershell
+kubectl exec [POD] [COMMAND] is DEPRECATED and will be removed in a future version. Use kubectl kubectl exec [POD] -- [COMMAND] instead.
+PowerShell 6.2.0
+Copyright (c) Microsoft Corporation. All rights reserved.
+
+https://aka.ms/pscore6-docs
+Type 'help' to get help.
+
+PS C:\> cd mnt
+PS C:\mnt> dir
+
+
+    Directory: C:\mnt
+
+Mode                LastWriteTime         Length Name
+----                -------------         ------ ----
+d-----         8/31/2020 12:46 PM                dir
+
+PS C:\mnt> cd dir
+PS C:\mnt\dir> dir
+
+
+    Directory: C:\mnt\dir
+
+Mode                LastWriteTime         Length Name
+----                -------------         ------ ----
+d-----         8/27/2020  4:57 PM                flannel
+d-----         8/27/2020  4:58 PM                kube-proxy
+-a----          4/2/2020  2:26 PM       13377024 csi-proxy.exe
+-a----         8/20/2020  2:15 PM             67 install nssm windows_exporter.txt
+-a----         8/19/2020 10:18 AM            432 join.yaml
+-a----         8/21/2020  1:51 PM       40024064 kubeadm.exe
+-a----         8/21/2020  1:45 PM      109078016 kubelet.exe
+-a----         8/19/2020  2:37 PM            708 StartKubelet.ps1
+-a----         8/20/2020 12:32 PM       14303232 windows_exporter-0.13.0-386.exe
+-a----         8/19/2020  2:37 PM       12459520 wins.exe
+
+PS C:\mnt\dir>
+
+
+
+[root@wc-master1 pv]# cat deploy-subdir.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: busybox
+  name: busybox-subdir
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: busybox
+  template:
+    metadata:
+      labels:
+        app: busybox
+      name: busybox
+    spec:
+      containers:
+      - command:
+        - powershell.exe
+        - -Command
+        - sleep 10000;
+        image: e2eteam/busybox:1.29
+        imagePullPolicy: IfNotPresent
+        name: busybox
+        volumeMounts:
+        - mountPath: /mnt/dir
+          name: mydir
+      nodeSelector:
+        kubernetes.io/os: windows
+      volumes:
+      - name: mydir
+        hostPath:
+          path: '/k'
+          type: Directory
+
+
+
+
+
+------------------
+
+
+    spec:Tolerations:     node.kubernetes.io/not-ready:NoExecute for 300s
+                 node.kubernetes.io/unreachable:NoExecute for 300s
+Events:
+  Type     Reason     Age        From                  Message
+  ----     ------     ----       ----                  -------
+  Normal   Scheduled  <unknown>  default-scheduler     Successfully assigned default/busybox-smb-subpath-win-5b645d9f79-55v5d to wc-winnode1
+  Normal   Pulled     <invalid>  kubelet, wc-winnode1  Container image "e2eteam/busybox:1.29" already present on machine
+  Warning  Failed     <invalid>  kubelet, wc-winnode1  Error: failed to create subPath directory for volumeMount "smb" of container "busybox"
+
+
+
+
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: busybox
+  name: busybox-smb-subpath-win
+  namespace: default
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: busybox
+  template:
+    metadata:
+      labels:
+        app: busybox
+      name: busybox
+    spec:
+      containers:
+      - command:
+        - powershell.exe
+        - -Command
+        - sleep 10000;
+        image: e2eteam/busybox:1.29
+        imagePullPolicy: IfNotPresent
+        name: busybox
+        volumeMounts:
+        - mountPath: /mnt/smb
+          name: smb
+          subPath: bb
+      nodeSelector:
+        kubernetes.io/os: windows
+      volumes:
+      - name: smb
+        persistentVolumeClaim:
+          claimName: pvc-smb
+
