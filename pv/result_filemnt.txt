@@ -1,3 +1,17 @@
+Events:
+  Type     Reason     Age               From                  Message
+  ----     ------     ----              ----                  -------
+  Normal   Scheduled  <unknown>         default-scheduler     Successfully assigned default/busybox-file-78bcff6ddc-tfd8v to wc-winnode1
+  Normal   Pulled     6s (x4 over 23s)  kubelet, wc-winnode1  Container image "e2eteam/busybox:1.29" already present on machine
+  Warning  Failed     6s (x4 over 22s)  kubelet, wc-winnode1  Error: Error response from daemon: 
+invalid volume specification: 'c:/k/join.yaml:c:/mnt/join.yaml': invalid mount config for type "bind": source path must be a directory
+
+
+
+====================================
+
+
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
