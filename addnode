@@ -1,0 +1,448 @@
+Windows PowerShell
+Copyright (C) Microsoft Corporation. All rights reserved.
+
+PS C:\Users\Administrator> kubeadm reset -f
+[preflight] Running pre-flight checks
+W0910 18:05:46.901721    6332 removeetcdmember.go:79] [reset] No kubeadm config, using etcd pod spec to get data directory
+[reset] No etcd config found. Assuming external etcd
+[reset] Please, manually reset etcd to prevent further issues
+[reset] Stopping the kubelet service
+[reset] Unmounting mounted directories in "/var/lib/kubelet"
+W0910 18:05:47.233229    6332 cleanupnode.go:99] [reset] Failed to evaluate the "/var/lib/kubelet" directory. Skipping its unmount and cleanup: CreateFile /var: The system cannot find the file specified.
+[reset] Deleting contents of config directories: [\etc\kubernetes\manifests /etc/kubernetes/pki]
+[reset] Deleting files: [\etc\kubernetes\admin.conf \etc\kubernetes\kubelet.conf \etc\kubernetes\bootstrap-kubelet.conf \etc\kubernetes\controller-manager.conf \etc\kubernetes\scheduler.conf]
+[reset] Deleting contents of stateful directories: [/var/lib/dockershim /var/run/kubernetes /var/lib/cni]
+
+The reset process does not clean CNI configuration. To do so, you must remove /etc/cni/net.d
+
+The reset process does not reset or clean up iptables rules or IPVS tables.
+If you wish to reset iptables, you must do so manually by using the "iptables" command.
+
+If your cluster was setup to utilize IPVS, run ipvsadm --clear (or similar)
+to reset your system's IPVS tables.
+
+The reset process does not clean your kubeconfig files and you must remove them manually.
+Please, check the contents of the $HOME/.kube/config file.
+PS C:\Users\Administrator>
+PS C:\Users\Administrator>
+PS C:\Users\Administrator>
+PS C:\Users\Administrator> nssm staus docker
+NSSM: The non-sucking service manager
+Version 2.24 64-bit, 2014-08-31
+Usage: nssm <option> [<args> ...]
+
+To show service installation GUI:
+
+        nssm install [<servicename>]
+
+To install a service without confirmation:
+
+        nssm install <servicename> <app> [<args> ...]
+
+To show service editing GUI:
+
+        nssm edit <servicename>
+
+To retrieve or edit service parameters directly:
+
+        nssm get <servicename> <parameter> [<subparameter>]
+
+        nssm set <servicename> <parameter> [<subparameter>] <value>
+
+        nssm reset <servicename> <parameter> [<subparameter>]
+
+To show service removal GUI:
+
+        nssm remove [<servicename>]
+
+To remove a service without confirmation:
+
+        nssm remove <servicename> confirm
+
+To manage a service:
+
+        nssm start <servicename>
+
+        nssm stop <servicename>
+
+        nssm restart <servicename>
+
+        nssm status <servicename>
+
+        nssm rotate <servicename>
+PS C:\Users\Administrator> nssm status docker
+SERVICE_RUNNING
+PS C:\Users\Administrator>
+PS C:\Users\Administrator>
+PS C:\Users\Administrator>
+PS C:\Users\Administrator> .\PrepareNode.ps1 -KubernetesVersion v1.18.8
+Using Kubernetes version: v1.18.8
+
+
+    Directory: C:\
+
+
+Mode                LastWriteTime         Length Name
+----                -------------         ------ ----
+d-----     2020-09-10   오후 6:05                k
+Creating Docker host network
+7d83f1dc263ce149daef900d0afa9c1ba6101033d8563c6a99264904ae01498b
+Registering wins service
+WARN[2020-09-10T18:06:42+09:00] Service is not stopped, going to stop it
+WARN[2020-09-10T18:06:45+09:00] Service is not stopped, going to stop it
+FATA[2020-09-10T18:06:48+09:00] failed to register service: could not query status: The service has not been started.
+
+
+    Directory: C:\var\log
+
+
+Mode                LastWriteTime         Length Name
+----                -------------         ------ ----
+d-----     2020-09-10   오후 6:06                kubelet
+
+
+    Directory: C:\var\lib\kubelet\etc
+
+
+Mode                LastWriteTime         Length Name
+----                -------------         ------ ----
+d-----     2020-09-10   오후 6:06                kubernetes
+
+
+    Directory: C:\etc\kubernetes
+
+
+Mode                LastWriteTime         Length Name
+----                -------------         ------ ----
+d-----     2020-09-10   오후 6:06                pki
+
+
+    Directory: C:\var\lib\kubelet\etc\kubernetes
+
+
+Mode                LastWriteTime         Length Name
+----                -------------         ------ ----
+d----l     2020-09-10   오후 6:06                pki
+Installing nssm
+
+
+    Directory: C:\Program Files
+
+
+Mode                LastWriteTime         Length Name
+----                -------------         ------ ----
+d-----     2020-08-19   오후 5:13                nssm
+Downloading https://k8stestinfrabinaries.blob.core.windows.net/nssm-mirror/nssm-2.24.zip to nssm.zip
+x nssm.exe: Can't unlink already-existing object
+tar.exe: Error exit delayed from previous errors.
+Registering kubelet service
+Error creating service!
+CreateService(): The specified service already exists.
+
+Set parameter "DependOnService" for service "kubelet".
+New-NetFirewallRule : Cannot create a file when that file already exists.
+At C:\Users\Administrator\PrepareNode.ps1:96 char:1
++ New-NetFirewallRule -Name kubelet -DisplayName 'kubelet' -Enabled Tru ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : ResourceExists: (MSFT_NetFirewallRule:root/standardcimv2/MSFT_NetFirewallRule) [New-NetF
+   irewallRule], CimException
+    + FullyQualifiedErrorId : Windows System Error 183,New-NetFirewallRule
+
+
+
+PS C:\Users\Administrator> nssm status wins
+Can't open service!
+OpenService(): The specified service does not exist as an installed service.
+
+PS C:\Users\Administrator> docker network ls
+NETWORK ID          NAME                DRIVER              SCOPE
+7d83f1dc263c        host                nat                 local
+016b7403d3b5        nat                 nat                 local
+8a4cdb6baa55        none                null                local
+PS C:\Users\Administrator> cd C:\k\
+PS C:\k> dir
+
+
+    Directory: C:\k
+
+
+Mode                LastWriteTime         Length Name
+----                -------------         ------ ----
+d-----     2020-09-08   오후 5:23                flannel
+d-----     2020-09-08   오후 5:24                kube-proxy
+-a----     2020-04-02   오후 1:27       13377024 csi-proxy.exe
+-a----     2020-09-10   오후 5:48            430 join.yaml
+-a----     2020-09-08   오후 5:06       40024064 kubeadm.exe
+-a----     2020-09-08   오후 5:06      109078016 kubelet.exe
+-a----     2020-09-10   오후 6:06            708 StartKubelet.ps1
+-a----     2020-09-01  오전 10:48       14303232 windows_exporter-0.13.0-386.exe
+-a----     2020-09-01  오전 11:01       12459520 wins.exe
+
+
+PS C:\k> kubeadm join --config=join.yaml
+W0910 18:07:48.444737    5408 join.go:346] [preflight] WARNING: JoinControlPane.controlPlane settings will be ignored when control-plane flag is not set.
+[preflight] Running pre-flight checks
+        [WARNING SystemVerification]: this Docker version is not on the list of validated versions: 19.03.12. Latest validated version: 19.03
+[preflight] Reading configuration from the cluster...
+[preflight] FYI: You can look at this config file with 'kubectl -n kube-system get cm kubeadm-config -oyaml'
+W0910 18:07:58.897288    5408 utils.go:26] The recommended value for "authentication.x509.clientCAFile" in "KubeletConfiguration" is: \etc\kubernetes\pki\ca.crt; the provided value is: /etc/kubernetes/pki/ca.crt
+[kubelet-start] Downloading configuration for the kubelet from the "kubelet-config-1.18" ConfigMap in the kube-system namespace
+[kubelet-start] Writing kubelet configuration to file "\\var\\lib\\kubelet\\config.yaml"
+[kubelet-start] Writing kubelet environment file with flags to file "\\var\\lib\\kubelet\\kubeadm-flags.env"
+[kubelet-start] Starting the kubelet
+[kubelet-start] Waiting for the kubelet to perform the TLS Bootstrap...
+
+This node has joined the cluster:
+* Certificate signing request was sent to apiserver and a response was received.
+* The Kubelet was informed of the new secure connection details.
+
+Run 'kubectl get nodes' on the control-plane to see this node join the cluster.
+
+PS C:\k>
+PS C:\k>
+PS C:\k>
+PS C:\k>
+PS C:\k>
+PS C:\k> nssm status kubelet
+SERVICE_RUNNING
+PS C:\k>
+PS C:\k>
+PS C:\k> ip addr
+ip : The term 'ip' is not recognized as the name of a cmdlet, function, script file, or operable program. Check the spe
+lling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:1
++ ip addr
++ ~~
+    + CategoryInfo          : ObjectNotFound: (ip:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+
+PS C:\k> ifconfig
+ifconfig : The term 'ifconfig' is not recognized as the name of a cmdlet, function, script file, or operable program. C
+heck the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:1
++ ifconfig
++ ~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (ifconfig:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+
+PS C:\k> ipconfig
+
+Windows IP Configuration
+
+
+Ethernet adapter vEthernet (Ethernet) 2:
+
+   Connection-specific DNS Suffix  . :
+   Link-local IPv6 Address . . . . . : fe80::4492:f296:fa74:b09c%3
+   IPv4 Address. . . . . . . . . . . : 172.16.3.134
+   Subnet Mask . . . . . . . . . . . : 255.255.255.0
+   Default Gateway . . . . . . . . . : 172.16.3.1
+
+Ethernet adapter vEthernet (nat):
+
+   Connection-specific DNS Suffix  . :
+   Link-local IPv6 Address . . . . . : fe80::a0fd:4273:ba27:973d%10
+   IPv4 Address. . . . . . . . . . . : 172.30.80.1
+   Subnet Mask . . . . . . . . . . . : 255.255.240.0
+   Default Gateway . . . . . . . . . :
+
+Ethernet adapter vEthernet (7d83f1dc263ce14):
+
+   Connection-specific DNS Suffix  . :
+   Link-local IPv6 Address . . . . . : fe80::bc8f:3383:f87a:5609%19
+   IPv4 Address. . . . . . . . . . . : 172.30.16.1
+   Subnet Mask . . . . . . . . . . . : 255.255.240.0
+   Default Gateway . . . . . . . . . :
+PS C:\k>
+PS C:\k>
+PS C:\k> nssm status kubelet
+SERVICE_RUNNING
+PS C:\k> nssm stop kubelet
+kubelet: STOP: The operation completed successfully.
+PS C:\k>
+PS C:\k>
+PS C:\k>
+PS C:\k>
+PS C:\k> nssm start kubelet
+kubelet: START: The operation completed successfully.
+PS C:\k> nssm status kubelet
+SERVICE_RUNNING
+PS C:\k> nssm status kubelet
+SERVICE_RUNNING
+PS C:\k>
+PS C:\k>
+PS C:\k>
+PS C:\k>
+PS C:\k> nssm status csi-proxy
+SERVICE_RUNNING
+PS C:\k> nssm edit csi-proxy
+PS C:\k> nssm status csi-proxy
+SERVICE_RUNNING
+PS C:\k>
+PS C:\k>
+PS C:\k>
+PS C:\k>
+PS C:\k>
+PS C:\k>
+PS C:\k> nssm restart csi-proxy
+csi-proxy: STOP: The operation completed successfully.
+csi-proxy: START: The operation completed successfully.
+PS C:\k>
+PS C:\k>
+PS C:\k>
+PS C:\k>
+PS C:\k>
+PS C:\k> nssm status kubelet
+SERVICE_RUNNING
+PS C:\k> nssm restart kubelet
+kubelet: STOP: The operation completed successfully.
+kubelet: START: The operation completed successfully.
+PS C:\k>
+PS C:\k>
+PS C:\k>
+PS C:\k>
+PS C:\k> nssm status windows_exporter
+SERVICE_RUNNING
+PS C:\k> nssm edit windows_exporter
+PS C:\k>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
