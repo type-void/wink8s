@@ -1,0 +1,15 @@
+[root@wc-mster-c ~]# k get po -A -owide
+NAMESPACE     NAME                                       READY   STATUS              RESTARTS   AGE   IP              NODE           NOMINATED NODE   READINESS GATES
+default       nginx-c100-845597d757-vhpm8                1/1     Running             0          54m   10.244.182.66   wc-lnxnode-c   <none>           <none>
+default       win-webserver-c1000-568df4cb6d-nqq98       0/1     ContainerCreating   0          84m   <none>          wc-winnode-c   <none>           <none>
+kube-system   calico-kube-controllers-8584f6f7f4-9rp6n   1/1     Running             0          26h   172.16.3.120    wc-mster-c     <none>           <none>
+kube-system   calico-node-d8gcs                          1/1     Running             0          25h   172.16.3.121    wc-lnxnode-c   <none>           <none>
+kube-system   calico-node-g6vnm                          1/1     Running             0          26h   172.16.3.120    wc-mster-c     <none>           <none>
+kube-system   coredns-f9fd979d6-4pg8p                    1/1     Running             0          25h   10.244.148.1    wc-mster-c     <none>           <none>
+kube-system   coredns-f9fd979d6-txzrc                    1/1     Running             0          25h   10.244.182.65   wc-lnxnode-c   <none>           <none>
+kube-system   etcd-wc-mster-c                            1/1     Running             0          46h   172.16.3.120    wc-mster-c     <none>           <none>
+kube-system   kube-apiserver-wc-mster-c                  1/1     Running             0          46h   172.16.3.120    wc-mster-c     <none>           <none>
+kube-system   kube-controller-manager-wc-mster-c         1/1     Running             8          46h   172.16.3.120    wc-mster-c     <none>           <none>
+kube-system   kube-proxy-pfmzc                           1/1     Running             0          46h   172.16.3.120    wc-mster-c     <none>           <none>
+kube-system   kube-proxy-s8qfj                           1/1     Running             0          25h   172.16.3.121    wc-lnxnode-c   <none>           <none>
+kube-system   kube-scheduler-wc-mster-c                  1/1     Running             6          46h   172.16.3.120    wc-mster-c     <none>           <none>
