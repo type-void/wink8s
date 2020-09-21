@@ -1,0 +1,36 @@
+[root@wc-master1 wink8s]# kubectl top no
+NAME          CPU(cores)   CPU%   MEMORY(bytes)   MEMORY%
+wc-lnxnode1   532m         13%    4019Mi          52%
+wc-lnxnode2   282m         7%     2593Mi          33%
+wc-master1    269m         6%     3220Mi          41%
+wc-winnode1   1912m        47%    4022Mi          49%
+wc-winnode2   956m         23%    1937Mi          23%
+[root@wc-master1 wink8s]# kubectl top po
+NAME                                   CPU(cores)   MEMORY(bytes)
+busybox-smb-866b4df9cf-5q6x2           0m           57Mi
+busybox-smb-866b4df9cf-hzrt2           0m           55Mi
+dotnet-d95697748-2nbfj                 7m           92Mi
+nginx-6f9965f88d-bnw29                 0m           5Mi
+rolling-update-6d84b645c8-dqvr4        0m           101Mi
+rolling-update-6d84b645c8-dqwwr        0m           100Mi
+rolling-update-6d84b645c8-wgln9        0m           103Mi
+win-webserver-hostnw-dc45d8d49-gx84d   0m           115Mi
+[root@wc-master1 wink8s]# kubectl top po -n kube-system
+NAME                                        CPU(cores)   MEMORY(bytes)
+coredns-66bff467f8-f6tlf                    5m           24Mi
+coredns-66bff467f8-md6lk                    5m           22Mi
+csi-smb-controller-864498f867-292dr         2m           31Mi
+csi-smb-controller-864498f867-vsps9         4m           35Mi
+csi-smb-node-5nlm2                          1m           24Mi
+csi-smb-node-ltxsx                          1m           19Mi
+csi-smb-node-tpj5m                          1m           30Mi
+csi-smb-node-win-4qckt                      0m           144Mi
+csi-smb-node-win-7w84x                      0m           180Mi
+elasticsearch-logging2-864d96986b-lbndl     315m         3326Mi
+etcd-wc-master1                             37m          332Mi
+fluent-bit-h9vjl                            3m           34Mi
+fluent-bit-rl6nt                            3m           27Mi
+fluent-bit-rtsj4                            3m           31Mi
+fluent-bit-windows-2psj4                    1000m        75Mi
+fluent-bit-windows-xm7sn                    999m         230Mi
+
